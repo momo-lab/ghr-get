@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+GHR_GET_ROOT=$(dirname $(dirname $(readlink -f $0)))
+
+function get_version() {
+  package=$1
+  url=https://github.com/$package/releases/latest
+
+  latest_data=$(curl -fsSL $url 2> /dev/null)
+  if [[ $? -ne 0 ]]; then
+    echo "$package is not found" >&2
+    return 1
+  fi
+  echo "$latest_data" |
+    grep -o "/$package/releases/download/[^\"]*" |
+    awk -F/ '{print $6}' |
+    sort |
+    uniq
+}
+
+function get_release_file() {
+  package=$1
+  version=$2
+
+  url=https://github.com/$package/releases/$version
+
+  # TODO support other os
+  case "$(uname)" in
+    [Mm][Ii][Nn][Gg][Ww]*)
+      os=windows
+      ;;
+    [Ll][Ii][Nn][Uu][Xx]*)
+      os=linux
+      ;;
+  esac
+  case "$(uname -m)" in
+    *64)
+      arch=64
+      ;;
+  esac
+
+  curl -fsSL $url |
+    grep -o "/$package/releases/download/[^\"]*" |
+    awk -F/ '{print $7}' |
+    grep ".*$os.*$arch.*" |
+    head -1
+}
+
+function download_release_file() {
+  url=$1
+  package_dir=$2
+
+}
+
+function unarchive_file() {
+  local package_dir="$1" file="$2"
+  case "$file" in
+    *.zip)
+      unzip -oq $package_dir/$file -d $package_dir
+      rm -f $package_dir/$file
+      ;;
+    *.tar.gz|*.tgz)
+      tar -xz -C $package_dir -f $package_dir/$file
+      rm -f $package_dir/$file
+      ;;
+    *.*)
+      echo "Unknown file type. [$file]." >&2
+      return 1
+      ;;
+    *)
+      # execution file
+      ;;
+  esac
+}
+
+function download_ghr() {
+  local site="$1" package="$2" version="$3"
+
+  local package_dir=$GHR_GET_ROOT/packages/$site/$package/$version
+  local file=$(get_release_file $package $version)
+  if [[ ! -d $package_dir ]]; then
+    mkdir -p $package_dir
+
+    local url=https://$site/$package/releases/download/$version/$file
+    curl -sSL -o $package_dir/$file $url
+    unarchive_file $package_dir $file
+    [[ $? -ne 0 ]] && return 1
+  fi
+
+  local archive_dir=$(echo $file |
+    sed -r 's/\.(zip|tar\.gz|tgz)$//')
+  [[ -d $package_dir/$archive_dir ]] &&
+    package_dir=$package_dir/$archive_dir
+
+  echo -n $package_dir
+}
+
+function clone_gh() {
+  local site="$1" package="$2"
+  package_dir=$GHR_GET_ROOT/packages/$site/$package
+  url=https://$site/$package.git
+
+  if [[ -d $package_dir ]]; then
+      {
+        cd $package_dir
+        git pull -q --all
+      }
+  else
+    git clone --recursive -q $url $package_dir
+  fi
+
+  echo -n $package_dir
+}
+
+function set_link() {
+  local package_dir="$1" names="$2"
+
+  if [[ "$names" != "" ]]; then
+    files=$(find $package_dir -path "$package_dir/$names")
+  else
+    # find bin/*
+    files=$(find $package_dir -mindepth 2 -maxdepth 2 \
+      -type f -executable -path "$package_dir/bin/*")
+    if [[ "$files" == "" ]]; then
+      # find ./*
+      files=$(find $package_dir -mindepth 1 -maxdepth 1 \
+        -type f -executable -path "$package_dir/*")
+    fi
+  fi
+
+  [[ -d $GHR_GET_ROOT/bin ]] || mkdir -p $GHR_GET_ROOT/bin
+  ln -fs $files $GHR_GET_ROOT/bin
+}
+
+function main() {
+  site=github.com
+  package=$1
+  names=$2
+  version=$(get_version $package)
+  [[ $? -ne 0 ]] && return 1
+  if [[ "$version" == "" ]]; then
+    mode=git
+    package_dir=$(clone_gh $site $package)
+  else
+    mode=release
+    package_dir=$(download_ghr $site $package $version)
+    #[[ $? -ne 0 ]] && return 1
+  fi
+
+  set_link $package_dir $names
+
+  return 0
+}
+
+main "$*"
