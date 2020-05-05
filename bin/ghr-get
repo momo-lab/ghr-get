@@ -45,12 +45,6 @@ function get_release_file() {
     head -1
 }
 
-function download_release_file() {
-  url=$1
-  package_dir=$2
-
-}
-
 function unarchive_file() {
   local package_dir="$1" file="$2"
   case "$file" in
