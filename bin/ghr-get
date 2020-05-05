@@ -46,7 +46,7 @@ function get_release_file() {
 }
 
 function unarchive_file() {
-  local package_dir="$1" file="$2"
+  local package="$1" package_dir="$2" file="$3"
   case "$file" in
     *.zip)
       unzip -oq $package_dir/$file -d $package_dir
@@ -62,6 +62,14 @@ function unarchive_file() {
       ;;
     *)
       # execution file
+      if (file $package_dir/$file | grep "executable" > /dev/null ); then
+        project=${package##*/}
+        mv $package_dir/$file $package_dir/$project
+        chmod a+x $package_dir/$project
+      else
+        echo "Unknown file type. [$file]." >&2
+        return 1
+      fi
       ;;
   esac
 }
@@ -76,7 +84,7 @@ function download_ghr() {
 
     local url=https://$site/$package/releases/download/$version/$file
     curl -sSL -o $package_dir/$file $url
-    unarchive_file $package_dir $file
+    unarchive_file $package $package_dir $file
     [[ $? -ne 0 ]] && return 1
   fi
 
