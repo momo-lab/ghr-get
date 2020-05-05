@@ -139,6 +139,7 @@ function main() {
   names=$2
   version=$(get_version $package)
   [[ $? -ne 0 ]] && return 1
+  echo "Install $package $version"
   if [[ "$version" == "" ]]; then
     mode=git
     package_dir=$(clone_gh $site $package)
