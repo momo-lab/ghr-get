@@ -107,7 +107,10 @@ function clone_gh() {
         git pull -q --all
       }
   else
-    git clone --recursive -q $url $package_dir
+    git \
+      -c url."https://".insteadOf=git:// \
+      clone --recursive --quiet \
+      $url $package_dir
   fi
 
   echo -n $package_dir
