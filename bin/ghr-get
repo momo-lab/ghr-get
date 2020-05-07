@@ -131,6 +131,9 @@ function set_link() {
         -type f -executable -path "$package_dir/*")
     fi
   fi
+  if [[ "$files" == "" ]]; then
+    return
+  fi
 
   [[ -d $GHR_GET_ROOT/bin ]] || mkdir -p $GHR_GET_ROOT/bin
   ln -fs $files $GHR_GET_ROOT/bin
