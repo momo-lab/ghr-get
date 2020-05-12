@@ -84,6 +84,11 @@ function download_ghr() {
 
     local url=https://$site/$package/releases/download/$version/$file
     curl -sSL -o $package_dir/$file $url
+    if [[ $? -ne 0 ]]; then
+      rm -rf $package_dir
+      echo "Download error $url" >&2
+      return 1
+    fi
     unarchive_file $package $package_dir $file
     [[ $? -ne 0 ]] && return 1
   fi
