@@ -5,7 +5,7 @@ function get_file_pattern() {
   shopt -s nocasematch
   local os arch
   case "$(uname)" in
-    mingw*)
+    mingw* | msys* | cygwin* )
       os='\(windows\|win\).*'
       ;;
     linux*)
