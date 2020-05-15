@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -e
+if [ "$1" = "--debug" ]; then
+  export GHR_GET_DEBUG=1
+  export PS4='+ [${BASH_SOURCE##*/}:${LINENO}] '
+  set -x
+  shift
+fi
+
+bin_path=$(dirname $(readlink -f "$0"))
+if [ -z "${GHR_GET_ROOT}" ]; then
+  GHR_GET_ROOT=$(dirname "$bin_path")
+fi
+export GHR_GET_ROOT
+export PATH="$bin_path:$PATH"
+
+source $GHR_GET_ROOT/lib/common-lib.bash
+
+command="$1"
+case "$command" in
+  "")
+    {
+      ghr-get---version
+      ghr-get-help
+    } | abort
+    ;;
+  -v | --version)
+    exec ghr-get---version
+    ;;
+  -h | --help)
+    exec ghr-get-help
+    ;;
+  *)
+    command_path="$(command -v "ghr-get-$command" || true)"
+    if [ -z "$command_path" ]; then
+      abort "No such command '$command'"
+    fi
+    shift 1
+    exec "$command_path" "$@"
+    ;;
+esac
+
+

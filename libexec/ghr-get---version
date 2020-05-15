@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+source $GHR_GET_ROOT/lib/common-lib.bash
+
+version="0.0.1"
+
+echo "ghr-get $version"

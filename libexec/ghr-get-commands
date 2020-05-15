@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Summary: List all available ghr-get commands
+# Usage: ghr-get commands
+source $GHR_GET_ROOT/lib/common-lib.bash
+
+IFS=: paths=($PATH)
+
+shopt -s nullglob
+{
+  for path in "${paths[@]}"; do
+    for command in "${path}/ghr-get-"*; do
+      command="${command##*ghr-get-}"
+      echo "$command"
+    done
+  done
+} | sort | uniq

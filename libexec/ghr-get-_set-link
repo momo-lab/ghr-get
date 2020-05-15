@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+source $GHR_GET_ROOT/lib/common-lib.bash
+
+package_dir="$1"
+names="$2"
+# TODO use names
+
+if [[ "$names" != "" ]]; then
+  files=$(find "$package_dir" -path "$package_dir/$names")
+else
+  # find bin/*
+  files=$(find "$package_dir/bin" -mindepth 1 -maxdepth 1 -type f -executable 2> /dev/null)
+  if [ $? -ne 0 ]; then
+    # find ./*
+    files=$(find "$package_dir" -mindepth 1 -maxdepth 1 -type f -executable)
+  fi
+fi
+
+[[ "$files" == "" ]] && exit
+[[ -d $GHR_GET_ROOT/bin ]] || mkdir -p $GHR_GET_ROOT/bin
+ln -fs $files $GHR_GET_ROOT/bin

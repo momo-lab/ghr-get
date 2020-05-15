@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+source $GHR_GET_ROOT/lib/common-lib.bash
+
+site="github.com"
+package="$1"
+package_dir="$GHR_GET_ROOT/packages/$site/$package"
+url="https://$site/$package.git"
+
+if [[ -d "$package_dir" ]]; then
+  {
+    cd "$package_dir"
+    git pull --all --quiet
+  }
+else
+  git \
+    -c url."https://".insteadOf=git:// \
+    clone --recursive --quiet \
+    "$url" "$package_dir"
+fi
+
+echo "$package_dir"
