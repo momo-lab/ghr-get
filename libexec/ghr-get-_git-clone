@@ -14,7 +14,7 @@ if [[ -d "$package_dir" ]]; then
 else
   git \
     -c url."https://".insteadOf=git:// \
-    clone --recursive --quiet \
+    clone --depth 1 --recursive --quiet \
     "$url" "$package_dir"
 fi
 
