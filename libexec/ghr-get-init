@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Summary: Configure the shell environment for ghr-get
+# Usage: eval "$(ghr-get init - [shell])"
+source $GHR_GET_ROOT/lib/common-lib.bash
+
+if [[ "$1" == "-" ]]; then
+  print=1
+  shift
+fi
+
+shell="$1"
+if [[ -z "$shell" ]]; then
+  shell="$(basename $SHELL)"
+fi
+
+if [ -z "$print" ]; then
+  case "$shell" in
+    bash)
+      if [ -f "$HOME/.bashrc" ] && [ ! -f "$HOME/.bash_profile" ]; then
+        profile='~/.bashrc'
+      else
+        profile='~/.bash_profile'
+      fi
+      ;;
+    zsh)
+      profile='~/.zshrc'
+      ;;
+    *)
+      profile='your profile'
+      ;;
+  esac
+  {
+    echo "# Load ghr-get automatically by appending"
+    echo "# the following to $profile"
+    echo
+    echo 'eval "$(ghr-get init -)"'
+  } >&2
+  exit 1
+fi
+
+# Add $PATH
+type ghr-get >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo 'export GHR_GET_ROOT='$GHR_GET_ROOT
+  echo 'export PATH=$GHR_GET_ROOT/bin:$PATH'
+fi
+
+# Load plugins
+for plugin in $GHR_GET_ROOT/plugins/*; do
+  plugin=$(readlink -f $plugin)
+  case "$plugin" in
+    *.sh | *.$shell )
+      echo 'source '$plugin
+      ;;
+    * )
+      echo "# skip: $plugin"
+      ;;
+  esac
+done
+
+# Load completion
+# TODO not implemented
