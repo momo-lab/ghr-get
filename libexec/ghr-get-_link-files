@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+source $GHR_GET_ROOT/lib/common-lib.bash
+
+package_dir="$1"
+mode="$2"
+names="$3"
+# TODO use names
+target_dir="$GHR_GET_ROOT/$mode"
+
+function get_files_bin() {
+  local package_dir="$1"
+
+  # find bin/*
+  files=$(find "$package_dir/bin" -mindepth 1 -maxdepth 1 -type f -executable 2> /dev/null)
+  if [ $? -ne 0 ]; then
+    # find ./*
+    files=$(find "$package_dir" -mindepth 1 -maxdepth 1 -type f -executable)
+  fi
+  # ignore plugin
+  files=$(echo "$files" | grep -v '\.plugin\.')
+  echo "$files"
+}
+
+function get_files_plugins() {
+  local package_dir="$1"
+  # find *.plugin.*sh
+  files=$(find "$package_dir" -mindepth 1 -maxdepth 1 -name "*.plugin.*sh")
+  echo "$files"
+}
+
+# remove links
+for file in $(find "$target_dir" -type l -lname '*'"$package_dir"'*'); do
+  rm -f "$file"
+done
+
+# In the case of a directory-only hierarchy, that directory is the package_dir.
+dirnames=$(find "$package_dir" -mindepth 1 -maxdepth 1)
+if [[ $(echo "$dirnames" | wc -l) -eq 1 ]] && [[ $(find "$dirnames" -maxdepth 0 -type d | wc -l) -eq 1 ]]; then
+  package_dir="$dirnames"
+fi
+
+# find link files.
+if [[ "$names" != "" ]]; then
+  files=$(find "$package_dir" -path "$package_dir/$names")
+else
+  files=$(eval get_files_$mode "$package_dir")
+fi
+
+# create links
+[[ "$files" == "" ]] && exit
+[[ -d $target_dir ]] || mkdir -p $target_dir
+ln -vfs $files $target_dir

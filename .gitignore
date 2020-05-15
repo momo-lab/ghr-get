@@ -1,3 +1,4 @@
 !bin/ghr-get
 bin/
 packages/
+plugins/

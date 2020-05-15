@@ -6,6 +6,7 @@ source $GHR_GET_ROOT/lib/common-lib.bash
 package="$1"
 version="$(ghr-get latest-version "$package")" || exit 1
 
+# get package
 if [[ "$version" == "" ]]; then
   echo "Install $package ..."
   package_dir="$(ghr-get-_git-clone "$package")"
@@ -14,4 +15,8 @@ else
   package_dir="$(ghr-get-_download-package "$package" "$version")"
 fi
 
-ghr-get-_set-link "$package_dir"
+# set execution links
+ghr-get-_link-files "$package_dir" "bin"
+
+# set plugin links
+ghr-get-_link-files "$package_dir" "plugins"
