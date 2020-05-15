@@ -7,6 +7,12 @@ names="$3"
 # TODO use names
 target_dir="$GHR_GET_ROOT/$mode"
 
+function find_files_bin() {
+  find "$1" \
+    -mindepth 1 -maxdepth 1 \
+    \( -type f -or -type l \) -executable 2> /dev/null
+}
+
 function get_files_bin() {
   local package_dir="$1"
 
@@ -17,10 +23,10 @@ function get_files_bin() {
   fi
 
   # find bin/*
-  files=$(find "$package_dir/bin" -mindepth 1 -maxdepth 1 -type f -executable 2> /dev/null)
+  files=$(find_files_bin "$package_dir/bin")
   if [ $? -ne 0 ]; then
     # find ./*
-    files=$(find "$package_dir" -mindepth 1 -maxdepth 1 -type f -executable)
+    files=$(find_files_bin "$package_dir")
   fi
   echo "$files"
 }
