@@ -10,14 +10,18 @@ target_dir="$GHR_GET_ROOT/$mode"
 function get_files_bin() {
   local package_dir="$1"
 
+  # If the plugin file exists, there is no executable file.
+  plugins="$(get_files_plugins "$package_dir")"
+  if [[ "$plugins" != "" ]]; then
+    return
+  fi
+
   # find bin/*
   files=$(find "$package_dir/bin" -mindepth 1 -maxdepth 1 -type f -executable 2> /dev/null)
   if [ $? -ne 0 ]; then
     # find ./*
     files=$(find "$package_dir" -mindepth 1 -maxdepth 1 -type f -executable)
   fi
-  # ignore plugin
-  files=$(echo "$files" | grep -v '\.plugin\.')
   echo "$files"
 }
 
@@ -49,4 +53,8 @@ fi
 # create links
 [[ "$files" == "" ]] && exit
 [[ -d $target_dir ]] || mkdir -p $target_dir
-ln -vfs $files $target_dir
+ln -fs $files $target_dir
+
+for file in $files; do
+  echo "Link to $mode/${file##*/}"
+done

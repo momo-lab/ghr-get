@@ -15,8 +15,8 @@ else
   package_dir="$(ghr-get-_download-package "$package" "$version")"
 fi
 
-# set execution links
-ghr-get-_link-files "$package_dir" "bin"
-
 # set plugin links
 ghr-get-_link-files "$package_dir" "plugins"
+
+# set execution links
+ghr-get-_link-files "$package_dir" "bin"
