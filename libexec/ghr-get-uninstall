@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Summary: Uninstall package
+# Usage: ghr-get uninstall PACKAGE
+source $GHR_GET_ROOT/lib/common-lib.bash
+
+site="github.com"
+package="$1"
+#version="$(ghr-get latest-version "$package")" || exit 1
+
+function remove_parent_dir() {
+  local dir="$1"
+  local parent_dir="$(dirname "$dir")"
+  local file_count="$(ls "$parent_dir" -1 | wc -l)"
+  if [[ "$file_count" == 0 ]]; then
+    rmdir "$parent_dir"
+    remove_parent_dir "$parent_dir"
+  fi
+}
+
+package_dir="$GHR_GET_ROOT/packages/$site/$package"
+[[ -d $package_dir ]] || abort "Package '"$package"' is not found"
+
+read -p "Do you want to continue? [y/N] " confirm
+shopt -s nocasematch
+[[ "$confirm" = "y" ]] || exit
+
+rm -rf "$package_dir"
+ghr-get-_unlink-files "$package_dir" "bin"
+ghr-get-_unlink-files "$package_dir" "plugins"
+
+remove_parent_dir "$package_dir"

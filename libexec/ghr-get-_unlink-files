@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+source $GHR_GET_ROOT/lib/common-lib.bash
+
+package_dir="$1"
+mode="$2"
+target_dir="$GHR_GET_ROOT/$mode"
+
+for file in $(find "$target_dir" -type l -lname '*'"$package_dir"'*' 2> /dev/null); do
+  rm -f "$file"
+done
