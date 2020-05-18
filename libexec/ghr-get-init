@@ -33,16 +33,11 @@ if [ -z "$print" ]; then
     echo "# Load ghr-get automatically by appending"
     echo "# the following to $profile"
     echo
-    echo 'eval "$(ghr-get init -)"'
+    echo 'export GHR_GET_ROOT='${GHR_GET_ROOT//$HOME/'$HOME'}
+    echo 'export PATH=$GHR_GET_ROOT/bin:$PATH'
+    echo 'type ghr-get >/dev/null 2>&1 && eval "$(ghr-get init -)"'
   } >&2
   exit 1
-fi
-
-# Add $PATH
-type ghr-get >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo 'export GHR_GET_ROOT='$GHR_GET_ROOT
-  echo 'export PATH=$GHR_GET_ROOT/bin:$PATH'
 fi
 
 # Load plugins
