@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 # Summary: Uninstall package
-# Usage: ghr-get uninstall PACKAGE
+# Usage: ghr-get uninstall PACKAGE[=version]
 source $GHR_GET_ROOT/lib/common-lib.bash
 
 site="github.com"
 package="$1"
-#version="$(ghr-get latest-version "$package")" || exit 1
+if [[ -z "$package" ]]; then
+  ghr-get help --usage uninstall
+  exit 1
+fi
+if [[ "$package" =~ = ]]; then
+  version="${package##*=}"
+  package="${package%%=*}"
+fi
+echo "[$package][$version]"
 
 function remove_parent_dir() {
   local dir="$1"
@@ -19,6 +27,10 @@ function remove_parent_dir() {
 
 package_dir="$GHR_GET_ROOT/packages/$site/$package"
 [[ -d $package_dir ]] || abort "Package '"$package"' is not found"
+if [[ -n "$version" ]]; then
+  package_dir="$package_dir/$version"
+  [[ -d $package_dir ]] || abort "Package '"$package"'(version $version) is not found"
+fi
 
 read -p "Do you want to continue? [y/N] " confirm
 shopt -s nocasematch

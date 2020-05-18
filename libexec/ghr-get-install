@@ -4,14 +4,23 @@
 source $GHR_GET_ROOT/lib/common-lib.bash
 
 package="$1"
-version="$(ghr-get latest-version "$package")" || exit 1
+if [[ -z "$package" ]]; then
+  ghr-get help --usage install
+  exit 1
+fi
+if [[ "$package" =~ = ]]; then
+  version="${package##*=}"
+  package="${package%%=*}"
+else
+  version="$(ghr-get latest-version "$package")" || exit 1
+fi
 
 # get package
 if [[ "$version" == "" ]]; then
   echo "Install $package ..."
   package_dir="$(ghr-get-_git-clone "$package")"
 else
-  echo "Install $package@$version ..."
+    echo "Install $package(version $version) ..."
   package_dir="$(ghr-get-_download-package "$package" "$version")"
 fi
 
