@@ -15,7 +15,7 @@ else
   git \
     -c url."https://".insteadOf=git:// \
     clone --depth 1 --recursive --quiet \
-    "$url" "$package_dir"
+    "$url" "$package_dir" > /dev/null
 fi
 
 echo "$package_dir"
