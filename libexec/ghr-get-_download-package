@@ -69,11 +69,11 @@ function unarchive_file() {
         # execution file
         local newname=${package##*/}
         local ext=${file##*.}
-        if [ "$ext" != "" ]; then
+        if [ "$ext" != "$file" ]; then
           newname="$newname.$ext"
         fi
         mv $package_dir/$file $package_dir/$newname
-        chmod a+x $package_dir/$project
+        chmod a+x $package_dir/$newname
       else
         echo "Unknown file type. [$file]." >&2
         return 1
