@@ -1,29 +1,39 @@
 #!/usr/bin/env bash
 source $GHR_GET_ROOT/lib/common-lib.bash
 
-function match_architecture() {
-  local files="$1"
-  shopt -s nocasematch
-  declare -a pattarns=()
-  case "$(uname)" in
-    mingw* | msys* | cygwin* ) patterns=("${patterns[@]}" windows* win*) ;;
-    linux*) patterns=("${patterns[@]}" linux musl) ;;
-    darwin) patterns=("${patterns[@]}" darwin osx) ;;
-  esac
-  case "$(uname -m)" in
-    x86_64) patterns=("${patterns[@]}" arm64 x86_64 *64) ;;
-    i686) patterns=("${patterns[@]}" 386 i686 *32) ;;
-    # TODO arm not supported
-  esac
-
+function match_patterns() {
+  local files="$1" patterns="$2"
   local pat
-  for pat in "${patterns[@]}"; do
-    pat="[-_\\.]${pat/\*/[^-_\\.]*}[-_\\.]"
+  for pat in $patterns; do
+    pat="[-_\\.]${pat/\*/[^-_\\.]*}\([-_\\.]\|$\)"
     local bufs=$(echo "$files" | grep "$pat")
     if [[ "$bufs" != "" ]]; then
       files="$bufs"
     fi
   done
+  echo "$files"
+}
+
+function match_architecture() {
+  local files="$1"
+  shopt -s nocasematch
+
+
+  local os
+  case "$(uname)" in
+    mingw* | msys* | cygwin* ) os="windows* win*" ;;
+    linux*) os="linux* musl" ;;
+    darwin) os="darwin osx" ;;
+  esac
+  files=$(match_patterns "$files" "$os")
+
+  local arch
+  case "$(uname -m)" in
+    x86_64) arch="arm64 x86_64 *64" ;;
+    i686) patterns="386 i686 *32" ;;
+    # TODO arm not supported
+  esac
+  files=$(match_patterns "$files" "$arch")
 
   file=$(echo "$files" | head -1)
   [ -z "$file" ] || echo "$file"
