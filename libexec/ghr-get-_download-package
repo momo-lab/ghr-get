@@ -1,41 +1,42 @@
 #!/usr/bin/env bash
 source $GHR_GET_ROOT/lib/common-lib.bash
 
-function get_file_pattern() {
+function match_architecture() {
+  local files="$1"
   shopt -s nocasematch
-  local os arch
+  declare -a pattarns=()
   case "$(uname)" in
-    mingw* | msys* | cygwin* )
-      os='\(windows\|win\).*'
-      ;;
-    linux*)
-      os=linux
-      ;;
-    darwin)
-      os='\(darwin\|osx\)'
-      ;;
+    mingw* | msys* | cygwin* ) patterns=("${patterns[@]}" windows* win*) ;;
+    linux*) patterns=("${patterns[@]}" linux musl) ;;
+    darwin) patterns=("${patterns[@]}" darwin osx) ;;
   esac
   case "$(uname -m)" in
-    *64)
-      arch='.*64'
-      ;;
-    # TODO support 386, arm, etc...
+    x86_64) patterns=("${patterns[@]}" arm64 x86_64 *64) ;;
+    i686) patterns=("${patterns[@]}" 386 i686 *32) ;;
+    # TODO arm not supported
   esac
 
-  echo [-_\\.]$os[-_\\.]\\?$arch
+  local pat
+  for pat in "${patterns[@]}"; do
+    pat=${pat/\*/[^-_\\.]*}
+    local bufs=$(echo "$files" | grep "$pat")
+    if [[ "$bufs" != "" ]]; then
+      files="$bufs"
+    fi
+  done
+
+  file=$(echo "$files" | head -1)
+  [ -z "$file" ] || echo "$file"
 }
 
 function get_release_filepath() {
   local site="$1" package="$2" version="$3"
   local url=https://$site/$package/releases/$version
   local html=$(curl -fsSL $url) || abort "Package version '$package@$version' is not found"
-  local pattern=$(get_file_pattern)
-  
-  local file=$(echo "$html" |
+  local files=$(echo "$html" |
     grep -o "/$package/releases/download/[^\"]*" |
-    awk -F/ '{print $7}' |
-    grep $pattern |
-    head -1)
+    awk -F/ '{print $7}')
+  local file=$(match_architecture "$files")
   [ -z "$file" ] && abort "no target architecture"
 
   echo "$file"
