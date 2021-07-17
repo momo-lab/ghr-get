@@ -22,6 +22,8 @@ if [[ "$version" == "" ]]; then
 else
     echo "Install $package(version $version) ..."
   package_dir="$(ghr-get-_download-package "$package" "$version")"
+  ret=$?
+  [[ $ret != 0 ]] && exit $ret
 fi
 
 # set plugin links
