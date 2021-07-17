@@ -20,10 +20,12 @@ if [[ "$version" == "" ]]; then
   echo "Install $package ..."
   package_dir="$(ghr-get-_git-clone "$package")"
 else
-    echo "Install $package(version $version) ..."
+  echo "Install $package(version $version) ..."
   package_dir="$(ghr-get-_download-package "$package" "$version")"
-  ret=$?
-  [[ $ret != 0 ]] && exit $ret
+  case $? in
+    1) exit 1 ;;
+    2) echo "$package already installed."; exit 1 ;;
+  esac
 fi
 
 # set plugin links
