@@ -13,7 +13,6 @@ if [[ "$package" =~ = ]]; then
   version="${package##*=}"
   package="${package%%=*}"
 fi
-echo "[$package][$version]"
 
 function remove_parent_dir() {
   local dir="$1"
