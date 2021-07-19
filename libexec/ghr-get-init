@@ -10,7 +10,11 @@ fi
 
 shell="$1"
 if [[ -z "$shell" ]]; then
-  shell="$(basename $SHELL)"
+  cmd=$(ppid=$(ps -o ppid $$ | tail -n 1); ps -o cmd -p $ppid | tail -n 1)
+  case "$cmd" in
+    *bash) shell="bash" ;;
+    *zsh)  shell="zsh"  ;;
+  esac
 fi
 
 if [ -z "$print" ]; then
