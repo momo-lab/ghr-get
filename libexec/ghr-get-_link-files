@@ -8,6 +8,16 @@ names="$3"
 target_dir="$GHR_GET_ROOT/$mode"
 
 function find_files_bin() {
+  # Grant execute permission to an executable file
+  # that does not have execute permission
+  find "$1" \
+    -mindepth 1 -maxdepth 1 \
+    \( -type f -or -type l \) -not -executable 2> /dev/null \
+    | xargs -I% file % \
+    | grep '\<executable\>' \
+    | awk -F: '{print $1}' \
+    | xargs -I% chmod a+x %
+
   find "$1" \
     -mindepth 1 -maxdepth 1 \
     \( -type f -or -type l \) -executable 2> /dev/null
