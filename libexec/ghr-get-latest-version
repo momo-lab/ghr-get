@@ -8,11 +8,9 @@ if [ -z "$package" ]; then
   exit 1
 fi
 
-url=https://github.com/$package/releases/latest
-html=$(curl -fsSL $url) || abort "Package '$package' is not found"
+url="$(eval echo $LATEST_PAGE_URL)"
+headers=$(curl -IfsS $url) || abort "Package '$package' is not found"
 
-echo "$html" |
-  grep -o "/$package/releases/download/[^\"]*" |
-  awk -F/ '{print $6}' |
-  sort |
-  uniq
+echo "$headers" |
+  grep '^location: ' |
+  awk -F/ '{print $8}'

@@ -10,3 +10,5 @@ abort() {
   } >&2
   exit 1
 }
+
+LATEST_PAGE_URL='https://github.com/${package}/releases/latest'
