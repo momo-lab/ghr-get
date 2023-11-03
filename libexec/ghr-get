@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -eu
+
+readonly VERSION=0.1.0
+bin_path=$(dirname $(readlink -f "$0"))
+if [ -z "${GHR_GET_ROOT}" ]; then
+  GHR_GET_ROOT=$(dirname "$bin_path")
+fi
+export GHR_GET_ROOT
+export PATH="$bin_path:$PATH"
+
+source $GHR_GET_ROOT/lib/getoptions.sh
+
+function parser_definition() {
+  msg -- "${2##*/} ${VERSION}"
+  setup REST help:usege abbr:true width:20,20 -- \
+      "Usege: ${2##*/} [global options...] [command] [options...] [arguments...]"
+  msg -- '' 'Global Options:'
+  disp :usege   -h --help    -- "Show help"
+  disp VERSION     --version -- "Show version"
+  msg -- '' 'Commands:'
+  cmd install         -- "Install package"
+  cmd uninstall       -- "Uninstall package"
+  cmd latest-version  -- "Show latest version"
+}
+
+function main() {
+  eval "$(getoptions parser_definition parse "$0") return 1"
+  parse "$@"
+  eval "set -- $REST"
+
+  if [ $# -eq 0 ]; then
+    exec "$0" --help
+    return 0
+  fi
+
+  local -r command=$1
+  local -r command_path="$(command -v "ghr-get-$command" || true)"
+  if [ -z "$command_path" ]; then
+    echo "Not a command: $command"
+    return 1
+  fi
+  shift 1
+  "$command_path" ["$@"]
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi
