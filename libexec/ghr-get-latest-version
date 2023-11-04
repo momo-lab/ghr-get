@@ -24,8 +24,8 @@ function main() {
   local -r url=https://github.com/${package}/releases/latest
   local -r headers=$(curl -IfsS ${url} 2>&1)
   if [[ "${headers%%:*}" == "curl" ]]; then
+    echo "${headers}" | head -1 >&2
     echo "package is not found: ${package}" >&2
-    echo "${headers%%\n}" >&2
     return 1
   fi
 

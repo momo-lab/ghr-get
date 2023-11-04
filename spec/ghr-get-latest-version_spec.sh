@@ -11,8 +11,8 @@ Describe 'latest-version subcommand'
     package='momo-lab/not_found'
     When call main $package
     The status should equal 1
-    The line 1 of error should equal "package is not found: $package"
-    The line 2 of error should equal "curl: (22) The requested URL returned error: 404"
+    The line 1 of error should equal "curl: (22) The requested URL returned error: 404"
+    The line 2 of error should equal "package is not found: $package"
   End
 
   It 'package is not found'
