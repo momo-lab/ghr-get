@@ -1,23 +1,19 @@
-#!/usr/bin/env bash
 set -eu
 
-export LIBEXEC_PATH=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
-source $LIBEXEC_PATH/ghr-get
-
-function parser_definition() {
-  setup REST help:usege abbr:true width:20,20 -- \
-      "Usege: ghr-get latest-version [options...] [package name]"
+function parser_definition_latest-version() {
+  setup REST help:usage_latest-version abbr:true width:20,20 -- \
+      "Usage: ghr-get latest-version [options...] [package name]"
   msg -- '' 'Options:'
-  disp :usege   -h --help    -- "Show help"
+  disp :usage_latest-version -h --help    -- "Show help"
 }
-eval "$(getoptions parser_definition parse) exit 1"
+eval "$(getoptions parser_definition_latest-version parse_latest-version) exit 1"
 
-function main() {
-  parse "$@"
+function latest-version() {
+  parse_latest-version "$@"
   eval "set -- $REST"
   if [ $# -ne 1 ]; then
-    ${BASH_SOURCE[0]} --help
-    return 1
+    usage_latest-version
+    return 0
   fi
 
   local -r package="$1"
@@ -36,7 +32,3 @@ function main() {
   fi
   echo -n ${version}
 }
-
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  main "$@"
-fi
