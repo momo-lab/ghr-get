@@ -1,20 +1,18 @@
 #!/usr/bin/env bash
 set -eu
 
-readonly VERSION=0.1.0
-bin_path=$(dirname $(readlink -f "$0"))
-if [ -z "${GHR_GET_ROOT}" ]; then
-  GHR_GET_ROOT=$(dirname "$bin_path")
-fi
-export GHR_GET_ROOT
-export PATH="$bin_path:$PATH"
+export VERSION=0.1.0
+export LIBEXEC_PATH=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
+export ROOT_PATH=$(dirname ${LIBEXEC_PATH})
+export LIB_PATH=${ROOT_PATH}/lib
+export PATH=${LIBEXEC_PATH}:$PATH
 
-source $GHR_GET_ROOT/lib/getoptions.sh
+source ${LIB_PATH}/getoptions.sh
 
-function parser_definition() {
-  msg -- "${2##*/} ${VERSION}"
+function parser_definition_main() {
+  msg -- "ghr-get ${VERSION}"
   setup REST help:usege abbr:true width:20,20 -- \
-      "Usege: ${2##*/} [global options...] [command] [options...] [arguments...]"
+      "Usege: ghr-get [global options...] [command] [options...] [arguments...]"
   msg -- '' 'Global Options:'
   disp :usege   -h --help    -- "Show help"
   disp VERSION     --version -- "Show version"
@@ -25,7 +23,7 @@ function parser_definition() {
 }
 
 function main() {
-  eval "$(getoptions parser_definition parse "$0") return 1"
+  eval "$(getoptions parser_definition_main parse) return 1"
   parse "$@"
   eval "set -- $REST"
 
@@ -41,7 +39,7 @@ function main() {
     return 1
   fi
   shift 1
-  "$command_path" ["$@"]
+  "$command_path" "$@"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
