@@ -18,7 +18,6 @@ function parser_definition_main() {
   msg -- '' 'Subcommands:'
   cmd install         -- "Install package"
   cmd uninstall       -- "Uninstall package"
-  cmd latest-version  -- "Show latest version"
 }
 
 function main() {
