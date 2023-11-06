@@ -67,11 +67,12 @@ function get_release_filepath() {
 
 function download_file() {
   local url="$1" package_dir="$2"
+  local file=${url##*/}
 
-  curl -sSL -o "$package_dir/$file" "$url"
+  curl -fsSL -o "$package_dir/$file" "$url"
   if [ $? -ne 0 ]; then
-    # TODO uninstall package
-    abort "Download error $url"
+    echo "Download error: $url" >&2
+    return 1
   fi
 }
 
