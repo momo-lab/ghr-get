@@ -26,6 +26,6 @@ Describe 'download_asset.sh'
     The output should equal "$output_dir"
     The path "$output_dir/$file" should be exist
     The path "$output_dir/$file" should be file
-    The path "$output_dir/$file" should equal_md5sum "$md5"
+    The md5sum of path "$output_dir/$file" should equal "$md5"
   End
 End
