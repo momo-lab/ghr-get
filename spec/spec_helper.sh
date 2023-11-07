@@ -21,7 +21,8 @@ spec_helper_loaded() {
 spec_helper_configure() {
   # Available functions: import, before_each, after_each, before_all, after_all
   : import 'support/custom_matcher'
-  
+
+  import 'support/matcher_equal_md5sum'
 
   before_all "global_before_all"
   after_all "global_after_all"
