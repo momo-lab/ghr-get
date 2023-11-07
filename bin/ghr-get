@@ -5,6 +5,7 @@ export VERSION=0.1.0
 export BIN_PATH=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
 export ROOT_PATH=$(dirname ${BIN_PATH})
 export LIB_PATH=${ROOT_PATH}/lib
+export PACKAGE_ROOT_PATH=${ROOT_PATH}/packages
 
 source ${LIB_PATH}/getoptions.sh
 

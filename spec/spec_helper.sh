@@ -21,10 +21,27 @@ spec_helper_loaded() {
 spec_helper_configure() {
   # Available functions: import, before_each, after_each, before_all, after_all
   : import 'support/custom_matcher'
+  
 
   before_all "global_before_all"
+  after_all "global_after_all"
+  before_each "global_before_each"
+  after_each "global_after_each"
 }
 
 global_before_all() {
-  export GHR_GET_ROOT=$(dirname $(readlink -f "${SHELLSPEC_LOAD_PATH[0]%%:*}"))
+  :
+}
+
+global_after_all() {
+ :
+}
+
+global_before_each() {
+  export PACKAGE_ROOT_PATH=./tmp
+  mkdir -p "$PACKAGE_ROOT_PATH"
+}
+
+global_after_each() {
+  rm -rf "$PACKAGE_ROOT_PATH"
 }

@@ -4,6 +4,20 @@ source ${LIB_PATH}/download_file.sh
 source ${LIB_PATH}/get_asset.sh
 
 function download_asset() {
+  local site="$1" package="$2" version="$3"
+
+  local asset_file=$(get_asset "$site" "$package" "$version")
+
+  local package_dir="${PACKAGE_ROOT_PATH}/${site}/${package}/${version}"
+  mkdir -p "$package_dir"
+
+  local url="https://${site}/${package}/releases/download/${version}/${asset_file}"
+  download_file "$url" "$package_dir"
+
+  echo "${package_dir}"
+}
+
+function download_asset_backup() {
   site="github.com"
   package="$1"
   version="$2"
